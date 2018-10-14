@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: setup
+spec:
+  template:
+    metadata:
+      name: setup
+    spec:
+      containers:
+      - name: setup
+        image: namtx/rails_mysql_kubernetes:latest
+        args: ["rake db:create && rake db:migrate"]
+        env:
+        # - name: DATABASE_NAME
+          # value: rails_mysql_kubernetes_development
+        - name: RAILS_ENV
+          value: production
+        - name: MYSQL_HOST
+          value: "mysql"
+        - name: MYSQL_USER
+          value: "root"
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "db-root-password"
+              key: "password"
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              name: "secret-key-base"
+              key: "secret-key-base"
+        - name: REDIS_URL
+          value: redis
+        - name: REDIS_PORT
+          value: "6379"
+      restartPolicy: Never
